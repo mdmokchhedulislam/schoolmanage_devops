@@ -1,0 +1,16 @@
+backend:
+  service:
+    name: backend
+    selector: backend
+    port: 5000
+    type: ClusterIP
+  replicaCount: 2
+  image:
+    repository: mokchhedul/schoolmanagerbackend
+    tag: latest
+    pullPolicy: IfNotPresent
+  serviceAccountName: backend
+  env:
+    JWT_SECRET: mokchhedul
+    MONGO_URI: mongodb+srv://mokchheduls46:mokchhedul@cluster0.cxqeo.mongodb.net/saas?retryWrites=true&w=majority&appName=Cluster0
+    PORT: "5000"

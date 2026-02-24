@@ -1,0 +1,148 @@
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.backend.service.name }}
+type: Opaque
+stringData:
+  JWT_SECRET: {{ .Values.backend.env.JWT_SECRET }}
+  MONGO_URI: {{ .Values.backend.env.MONGO_URI }}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.backend.service.name }}
+data:
+  PORT: "{{ .Values.backend.env.PORT }}"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.backend.service.name }}
+  labels:
+    app: {{ .Values.backend.service.selector }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.backend.service.selector }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.backend.service.selector }}
+    spec:
+      serviceAccountName: {{ .Values.backend.serviceAccountName }}
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1001
+      containers:
+        - name: {{ .Values.backend.service.name }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.service.port }}
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.backend.service.name }}
+                  key: PORT
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.service.name }}
+                  key: JWT_SECRET
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.service.name }}
+                  key: MONGO_URI
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.backend.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.backend.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.backend.service.name }}
+  labels:
+    app: {{ .Values.backend.service.selector }}
+spec:
+  selector:
+    app: {{ .Values.backend.service.selector }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.port }}
+  type: {{ .Values.backend.service.type }}
+  
+
+---
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.backend.service.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.backend.service.selector }}
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.backend.service.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.backend.service.name }}
+  minReplicas: {{ .Values.backend.replicaCount }}
+  maxReplicas: {{ .Values.backend.replicaCount | int + 3 }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 60
