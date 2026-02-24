@@ -1,0 +1,11 @@
+frontend:
+  service:
+    name: frontend
+    selector: frontend
+    port: 3000
+    type: ClusterIP
+  replicaCount: 2
+  image:
+    repository: mokchhedul/schoolmanagerfrontend
+    tag: latest
+    pullPolicy: IfNotPresent

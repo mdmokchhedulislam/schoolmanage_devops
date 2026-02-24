@@ -1,0 +1,94 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.service.name }}
+  labels:
+    app: {{ .Values.frontend.service.selector }}
+
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.service.selector }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.frontend.service.selector }}
+
+    spec:
+      serviceAccountName: {{ .Values.frontend.serviceAccountName }}
+
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1001
+
+      containers:
+        - name: {{ .Values.frontend.service.name }}
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+
+          ports:
+            - containerPort: {{ .Values.frontend.service.port }}
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.frontend.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.frontend.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.service.name }}
+  labels:
+    app: {{ .Values.frontend.service.selector }}
+
+spec:
+  selector:
+    app: {{ .Values.frontend.service.selector }}
+
+  ports:
+    - protocol: TCP
+      port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.port }}
+
+  type: {{ .Values.frontend.service.type }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.frontend.service.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.service.selector }}
