@@ -9,3 +9,4 @@ frontend:
     repository: mokchhedul/schoolmanagerfrontend
     tag: latest
     pullPolicy: IfNotPresent
+  serviceAccountName: frontend
