@@ -77,18 +77,18 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: {{ .Values.backend.service.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: {{ .Values.backend.service.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: {{ .Values.backend.service.port }}
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: {{ .Values.backend.service.port }}
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
 
 ---
 

@@ -20,9 +20,10 @@ spec:
       labels:
         app: {{ .Values.frontend.service.selector }}
     spec:
-      serviceAccountName: {{ .Values.frontend.serviceAccountName }}
+      # serviceAccountName: {{ .Values.frontend.serviceAccountName }}
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
         fsGroup: 1001
       containers:
         - name: {{ .Values.frontend.service.name }}
@@ -40,18 +41,18 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.frontend.service.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.frontend.service.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.frontend.service.port }}
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.frontend.service.port }}
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
