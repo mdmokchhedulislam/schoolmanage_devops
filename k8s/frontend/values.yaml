@@ -7,6 +7,6 @@ frontend:
   replicaCount: 2
   image:
     repository: mokchhedul/schoolmanagerfrontend
-    tag: latest
+    tag: sha-8c23cdd
     pullPolicy: IfNotPresent
   serviceAccountName: frontend

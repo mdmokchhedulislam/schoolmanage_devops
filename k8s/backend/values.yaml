@@ -7,7 +7,7 @@ backend:
   replicaCount: 2
   image:
     repository: mokchhedul/schoolmanagerbackend
-    tag: latest
+    tag: sha-992a22d
     pullPolicy: IfNotPresent
   serviceAccountName: backend
   env:

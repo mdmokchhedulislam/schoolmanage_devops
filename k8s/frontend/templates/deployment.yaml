@@ -90,7 +90,7 @@ spec:
     kind: Deployment
     name: {{ .Values.frontend.service.name }}
   minReplicas: {{ .Values.frontend.replicaCount }}
-  maxReplicas: {{ .Values.frontend.replicaCount | int + 3 }}
+  maxReplicas: {{ add (int .Values.backend.replicaCount) }}
   metrics:
     - type: Resource
       resource:

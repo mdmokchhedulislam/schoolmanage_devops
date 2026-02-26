@@ -2,12 +2,12 @@ version: "3.9"
 
 services:
   frontend:
-    image: mokchhedul/schoolmanagerfrontend:latest
+    image: mokchhedul/schoolmanagerfrontend:sha-8c23cdd
     ports:
       - "80:80"
 
   backend:
-    image: mokchhedul/schoolmanagerbackend:latest
+    image: mokchhedul/schoolmanagerbackend:sha-992a22d
     environment:
       - JWT_SECRET=mokchhedul
       - MONGO_URI=mongodb+srv://mokchheduls46:mokchhedul@cluster0.cxqeo.mongodb.net/saas?retryWrites=true&w=majority&appName=Cluster0
