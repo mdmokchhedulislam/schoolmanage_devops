@@ -41,9 +41,10 @@ spec:
       labels:
         app: {{ .Values.backend.service.selector }}
     spec:
-      serviceAccountName: {{ .Values.backend.serviceAccountName }}
+      # serviceAccountName: {{ .Values.backend.serviceAccountName }}
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
         fsGroup: 1001
       containers:
         - name: {{ .Values.backend.service.name }}
